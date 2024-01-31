@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema version="1.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:mkm="MkmBotXmlNamespace"
+           targetNamespace="MkmBotXmlNamespace">
+
+<xs:element name="MkmBot">
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element name="DataProviderInfo" type="mkm:DataProviderInfoType"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<xs:complexType name="DataProviderInfoType">
+        <xs:sequence>
+            <xs:element name="Endpoint" type="xs:string"/>
+        </xs:sequence>
+</xs:complexType>
+  
+</xs:schema>

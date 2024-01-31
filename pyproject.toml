@@ -1,0 +1,26 @@
+[project]
+name = "mkm_bot"
+description = "A cardmarket.com bot to help updating card stock prices."
+readme = "README.md"
+authors = [{name = "Francisco Castanheira", email = "franciscocastanheira1998@gmail.com"}]
+requires-python = ">=3.11"
+dynamic = ["version"]
+dependencies = [
+    "lxml~=5.1"
+]
+
+[project.scripts]
+mkm-bot = "mkm_bot.main:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+packages = ["mkm_bot", "tests"]
+strict = true
+
+[tool.flake8]
+exclude = [".git", ".venv", ".git"]
+max-line-length = 79
+count = true

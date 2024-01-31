@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mkm:MkmBot xmlns:mkm="MkmBotXmlNamespace">
+
+ <DataProviderInfo>
+    <Endpoint>https://cardmarket.com/</Endpoint>
+ </DataProviderInfo>
+
+</mkm:MkmBot>
