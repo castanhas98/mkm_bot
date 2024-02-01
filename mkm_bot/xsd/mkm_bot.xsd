@@ -2,17 +2,17 @@
 <xs:schema version="1.0"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:mkm="MkmBotXmlNamespace"
-           targetNamespace="MkmBotNamespace">
+           targetNamespace="MkmBotXmlNamespace">
 
 <xs:element name="MkmBot">
     <xs:complexType>
         <xs:sequence>
-            <xs:element name="DataProviderInfo" type="mkm:DataProviderInfoType"/>
+            <xs:element name="DataProvider" type="mkm:DataProviderType"/>
         </xs:sequence>
     </xs:complexType>
 </xs:element>
 
-<xs:complexType name="DataProviderInfoType">
+<xs:complexType name="DataProviderType">
         <xs:sequence>
             <xs:element name="Endpoint" type="xs:string"/>
         </xs:sequence>
