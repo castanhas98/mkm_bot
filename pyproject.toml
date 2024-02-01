@@ -20,6 +20,10 @@ build-backend = "setuptools.build_meta"
 packages = ["mkm_bot", "tests"]
 strict = true
 
+[[tool.mypy.overrides]]
+module = 'lxml.*'
+ignore_missing_imports = true
+
 [tool.flake8]
 exclude = [".git", ".venv", ".git"]
 max-line-length = 79
