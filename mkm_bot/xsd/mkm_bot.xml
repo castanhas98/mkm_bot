@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mkm:MkmBot xmlns:mkm="MkmBotXmlNamespace">
+    <Logging>
+        <Directory>/home/francisco/git/mkm_bot/.log/</Directory>
+    </Logging>
 
- <DataProvider>
-    <Endpoint>https://cardmarket.com/</Endpoint>
- </DataProvider>
+    <DataProvider>
+        <Endpoint>https://cardmarket.com/</Endpoint>
+    </DataProvider>
 
 </mkm:MkmBot>

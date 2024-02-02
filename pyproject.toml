@@ -6,7 +6,9 @@ authors = [{name = "Francisco Castanheira", email = "franciscocastanheira1998@gm
 requires-python = ">=3.11"
 dynamic = ["version"]
 dependencies = [
-    "lxml~=5.1"
+    "lxml~=5.1",
+    "pylsp-mypy~=0.6",  # needs to be installed in the local environment to work, for some reason. Through pipx doesn't work.
+    "pytest~=8.0",
 ]
 
 [project.scripts]

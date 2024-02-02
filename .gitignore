@@ -2,3 +2,6 @@ __pycache__
 *.egg-info
 .venv
 .tox
+.log
+.mypy_cache
+.pytest_cache

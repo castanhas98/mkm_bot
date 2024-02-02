@@ -7,10 +7,17 @@
 <xs:element name="MkmBot">
     <xs:complexType>
         <xs:sequence>
+            <xs:element name="Logging" type="mkm:LoggingType"/>
             <xs:element name="DataProvider" type="mkm:DataProviderType"/>
         </xs:sequence>
     </xs:complexType>
 </xs:element>
+
+<xs:complexType name="LoggingType">
+        <xs:sequence>
+            <xs:element name="Directory" type="xs:string"/>
+        </xs:sequence>
+</xs:complexType>
 
 <xs:complexType name="DataProviderType">
         <xs:sequence>
