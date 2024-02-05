@@ -32,6 +32,7 @@ def main() -> None:
     xml_root = read_and_validate_xml_config(xml_path)
     mkm_bot_config = MkmBotConfig(xml_root)
 
+    setup_logging(mkm_bot_config.logging_config)
     logger = logging.getLogger(__name__)
 
     logger.info("Successfully read XML config: %s", mkm_bot_config)
