@@ -42,6 +42,9 @@ def main() -> None:
     ) as cardmarket_client:
         cardmarket_client.login()
 
+        for pricing_parameters in cardmarket_client.get_pricing_parameters():
+            logger.info(f"Obtained the following pricing parameters: {pricing_parameters}")
+
     return
 
 
