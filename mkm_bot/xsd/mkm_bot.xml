@@ -4,8 +4,10 @@
         <Directory>/home/francisco/git/mkm_bot/.log/</Directory>
     </Logging>
 
-    <DataProvider>
-        <Endpoint>https://cardmarket.com/</Endpoint>
-    </DataProvider>
+    <Cardmarket>
+        <Endpoint>https://cardmarket.com/en/Magic/</Endpoint>
+        <UsernamePath>/home/francisco/.ssh/mkm_username</UsernamePath>
+        <PasswordPath>/home/francisco/.ssh/mkm_password</PasswordPath>
+    </Cardmarket>
 
 </mkm:MkmBot>

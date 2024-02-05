@@ -9,6 +9,8 @@ dependencies = [
     "lxml~=5.1",
     "pylsp-mypy~=0.6",  # needs to be installed in the local environment to work, for some reason. Through pipx doesn't work.
     "pytest~=8.0",
+    "requests~=2.31",
+    "undetected_chromedriver~=3.5",
 ]
 
 [project.scripts]
@@ -24,6 +26,10 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = 'lxml.*'
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = 'undetected_chromedriver.*'
 ignore_missing_imports = true
 
 [tool.flake8]

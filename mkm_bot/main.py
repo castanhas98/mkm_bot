@@ -4,8 +4,10 @@ import sys
 
 from datetime import datetime
 from pathlib import Path
+
 from .xsd.xml_config import read_and_validate_xml_config
 from .config import MkmBotConfig, LoggingConfig
+from .cardmarket_client import start_cardmarket_client
 
 
 def setup_logging(config: LoggingConfig) -> None:
@@ -21,6 +23,7 @@ def setup_logging(config: LoggingConfig) -> None:
 
 
 def main() -> None:
+    # Read config and set up logging
     assert len(sys.argv) == 2
 
     xml_path = Path(sys.argv[1])
@@ -29,8 +32,15 @@ def main() -> None:
     xml_root = read_and_validate_xml_config(xml_path)
     mkm_bot_config = MkmBotConfig(xml_root)
 
-    setup_logging(mkm_bot_config.logging_config)
-    logging.info("Successfully read XML config: %s", mkm_bot_config)
+    logger = logging.getLogger(__name__)
+
+    logger.info("Successfully read XML config: %s", mkm_bot_config)
+
+    with start_cardmarket_client(
+        mkm_bot_config.cardmarket_config
+    ) as cardmarket_client:
+        cardmarket_client.login()
+
     return
 
 
