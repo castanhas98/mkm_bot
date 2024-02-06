@@ -30,7 +30,7 @@ def main() -> None:
     assert xml_path.exists()
 
     xml_root = read_and_validate_xml_config(xml_path)
-    mkm_bot_config = MkmBotConfig(xml_root)
+    mkm_bot_config = MkmBotConfig.from_config(xml_root)
 
     setup_logging(mkm_bot_config.logging_config)
     logger = logging.getLogger(__name__)
@@ -43,7 +43,8 @@ def main() -> None:
         cardmarket_client.login()
 
         for pricing_parameters in cardmarket_client.get_pricing_parameters():
-            logger.info(f"Obtained the following pricing parameters: {pricing_parameters}")
+            logger.info("Obtained the following pricing parameters: "
+                        f"{pricing_parameters}")
 
     return
 

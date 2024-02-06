@@ -20,8 +20,12 @@ NAME_PASSWORD = "userPassword"
 XPATH_LOGIN = "/html/body/header/nav/ul/li/div/form/input[@value='Log in']"
 XPATH_LOGGEDIN_USERNAME = "/html/body/header/nav/ul/li/ul/li/a/div" \
     "[@title='My Account']/span[@class='d-none d-lg-block']"
-XPATH_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-flex align-items-center pagination mb-2 mt-2']/div[@class='col-12 col-sm-6 ms-auto']/div/span"
-XPATH_NEXT_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-flex align-items-center pagination mb-2 mt-2']/div[@class='col-12 col-sm-6 ms-auto']/div/a[@aria-label='Next page']"
+XPATH_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-flex " \
+    "align-items-center pagination mb-2 mt-2']/div[@class='col-12 col" \
+    "-sm-6 ms-auto']/div/span"
+XPATH_NEXT_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-" \
+    "flex align-items-center pagination mb-2 mt-2']/div[@class='col-12" \
+    "col-sm-6 ms-auto']/div/a[@aria-label='Next page']"
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +34,21 @@ logger = logging.getLogger(__name__)
 def _medium_delay() -> None:
     time.sleep(float(random.randrange(0, 300)) / 100)
     return
+
+
+def is_last_page(page_x_of_y: str) -> bool:
+    match = re.match(r"Page (\d+) of (\d+)$", page_x_of_y)
+    if match is None:
+        raise RuntimeError(f"No match for '{page_x_of_y}'")
+
+    current = int(match.group(1))
+    total = int(match.group(2))
+
+    if current > total or current <= 0 or total <= 0:
+        raise RuntimeError(
+            f"Invalid page numbers: current={current}, total={total}")
+
+    return current == total
 
 
 class CardmarketClient:
@@ -46,7 +65,8 @@ class CardmarketClient:
         self.driver = uc.Chrome(headless=False, use_subprocess=False)
 
     def _close_driver(self) -> None:
-        self.driver.quit()
+        if hasattr(self, "driver"):
+            self.driver.quit()
 
     def login(self) -> None:
         self.driver.get(MKM_HOME)
@@ -88,20 +108,6 @@ class CardmarketClient:
         logger.info(
             "Successfully checked that username is as expected after login")
 
-    def _is_last_page(self, page_x_of_y: str) -> bool:
-        match = re.match(r"Page (\d+) of (\d+)", page_x_of_y)
-        if match is None:
-            raise RuntimeError(f"No match for '{page_x_of_y}'")
-
-        current = int(match.group(1))
-        total = int(match.group(2))
-
-        if current > total or current <= 0 or total <= 0:
-            raise RuntimeError(
-                f"Invalid page numbers: current={current}, total={total}")
-
-        return current == total
-
     def get_pricing_parameters(self) -> Iterator[PricingParameters]:
         self.driver.get(MKM_SINGLES)
         logger.info(f"GET request to: {MKM_SINGLES}")
@@ -109,7 +115,7 @@ class CardmarketClient:
 
         page_x_of_y = self.driver.find_element(By.XPATH, XPATH_PAGE).text
 
-        while not self._is_last_page(page_x_of_y):
+        while not is_last_page(page_x_of_y):
             self.driver.find_element(By.XPATH, XPATH_NEXT_PAGE).click()
             _medium_delay()
 
