@@ -24,7 +24,7 @@ XPATH_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-flex " \
     "align-items-center pagination mb-2 mt-2']/div[@class='col-12 col" \
     "-sm-6 ms-auto']/div/span"
 XPATH_NEXT_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-" \
-    "flex align-items-center pagination mb-2 mt-2']/div[@class='col-12" \
+    "flex align-items-center pagination mb-2 mt-2']/div[@class='col-12 " \
     "col-sm-6 ms-auto']/div/a[@aria-label='Next page']"
 
 
@@ -62,10 +62,12 @@ class CardmarketClient:
         self._close_driver()
 
     def _open_driver(self) -> None:
+        logger.info("Opening undetected_chromedriver.")
         self.driver = uc.Chrome(headless=False, use_subprocess=False)
 
     def _close_driver(self) -> None:
         if hasattr(self, "driver"):
+            logger.info("Closing undetected_chromedriver.")
             self.driver.quit()
 
     def login(self) -> None:
@@ -113,14 +115,17 @@ class CardmarketClient:
         logger.info(f"GET request to: {MKM_SINGLES}")
         _medium_delay()
 
-        page_x_of_y = self.driver.find_element(By.XPATH, XPATH_PAGE).text
-
-        while not is_last_page(page_x_of_y):
-            self.driver.find_element(By.XPATH, XPATH_NEXT_PAGE).click()
-            _medium_delay()
-
+        while True:
+            # Looping through the cards in a page here.
             zero = Decimal(0)
             yield PricingParameters(zero, zero, zero, zero, zero, zero)
+
+            page_x_of_y = self.driver.find_element(By.XPATH, XPATH_PAGE).text
+            if is_last_page(page_x_of_y):
+                break
+
+            self.driver.find_element(By.XPATH, XPATH_NEXT_PAGE).click()
+            _medium_delay()
 
 
 @contextmanager

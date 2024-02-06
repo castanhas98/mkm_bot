@@ -46,6 +46,7 @@ def main() -> None:
             logger.info("Obtained the following pricing parameters: "
                         f"{pricing_parameters}")
 
+    logger.info("Done. Shutting down.")
     return
 
 
