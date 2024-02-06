@@ -44,7 +44,7 @@ def is_last_page(page_x_of_y: str) -> bool:
     current = int(match.group(1))
     total = int(match.group(2))
 
-    if current > total or current <= 0 or total <= 0:
+    if current > total or current == 0 or total == 0:
         raise RuntimeError(
             f"Invalid page numbers: current={current}, total={total}")
 
