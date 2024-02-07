@@ -49,20 +49,3 @@ def test_is_last_page_invalid_page_nubmers(
         is_last_page(page_x_of_y)
 
     assert str(e.value) == f"Invalid page numbers: current={x}, total={y}"
-
-
-# def is_last_page(page_x_of_y: str) -> bool:
-#     match = re.match(r"Page (\d+) of (\d+)$", page_x_of_y)
-#     if match is None:
-#         raise RuntimeError(f"No match for '{page_x_of_y}'")
-#
-#     current = int(match.group(1))
-#     total = int(match.group(2))
-#
-#     if current > total or current <= 0 or total <= 0:
-#         raise RuntimeError(
-#             f"Invalid page numbers: current={current}, total={total}")
-#
-#     return current == total
-#
-#

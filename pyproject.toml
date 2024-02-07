@@ -34,5 +34,5 @@ ignore_missing_imports = true
 
 [tool.flake8]
 exclude = [".git", ".venv", ".git"]
-max-line-length = 79
+max-line-length = 99
 count = true

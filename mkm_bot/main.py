@@ -42,9 +42,10 @@ def main() -> None:
     ) as cardmarket_client:
         cardmarket_client.login()
 
-        for pricing_parameters in cardmarket_client.get_pricing_parameters():
-            logger.info("Obtained the following pricing parameters: "
-                        f"{pricing_parameters}")
+        cardmarket_client.update_card_prices()
+        # for pricing_parameters in cardmarket_client.get_pricing_parameters():
+        #     logger.info("Obtained the following pricing parameters: "
+        #                 f"{pricing_parameters}")
 
     logger.info("Done. Shutting down.")
     return
