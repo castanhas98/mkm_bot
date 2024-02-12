@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Iterator
 from contextlib import contextmanager
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -148,7 +147,7 @@ class CardmarketClient:
 
     def login(self) -> None:
         self.driver.get(MKM_HOME)
-        self._bypass_cloudflare()
+        # self._bypass_cloudflare()
         logger.info(f"GET request to: {MKM_HOME}")
         _medium_delay()
 
@@ -167,44 +166,44 @@ class CardmarketClient:
         self.driver.find_element(
             By.XPATH, XPATH_LOGIN
         ).click()
-        self._bypass_cloudflare()
+        # self._bypass_cloudflare()
         logger.info("Logged in")
         _medium_delay()
 
         self._check_login_valid()
 
-    def _bypass_cloudflare(self) -> None:
-        while True:
-            try:
-                # just checking some info to assess if we are at cloudflare
-                assert self.driver.title != CLOUDFLARE_TAB_TITLE
-                break
-
-            except AssertionError:
-                logger.info("Caught expected AssertionError")
-                WebDriverWait(self.driver, TIMEOUT).until(
-                    EC.frame_to_be_available_and_switch_to_it(
-                        (By.XPATH, XPATH_CLOUDFLARE_IFRAME)
-                    )
-                )
-
-                WebDriverWait(self.driver, TIMEOUT).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, XPATH_CLOUDFLARE_CHECKBOX)
-                    )
-                )
-                _medium_delay()
-                self.driver.find_element(
-                    By.XPATH, XPATH_CLOUDFLARE_CHECKBOX
-                ).click()
-
-                self.driver.switch_to.default_content()
-                WebDriverWait(self.driver, TIMEOUT).until(
-                    EC.visibility_of_element_located(
-                        (By.XPATH, XPATH_LOGGEDIN_USERNAME)
-                    )
-                )
-
+    # def _bypass_cloudflare(self) -> None:
+    #     while True:
+    #         try:
+    #             # just checking some info to assess if we are at cloudflare
+    #             assert self.driver.title != CLOUDFLARE_TAB_TITLE
+    #             break
+    #
+    #         except AssertionError:
+    #             logger.info("Caught expected AssertionError")
+    #             WebDriverWait(self.driver, TIMEOUT).until(
+    #                 EC.frame_to_be_available_and_switch_to_it(
+    #                     (By.XPATH, XPATH_CLOUDFLARE_IFRAME)
+    #                 )
+    #             )
+    #
+    #             WebDriverWait(self.driver, TIMEOUT).until(
+    #                 EC.element_to_be_clickable(
+    #                     (By.XPATH, XPATH_CLOUDFLARE_CHECKBOX)
+    #                 )
+    #             )
+    #             _medium_delay()
+    #             self.driver.find_element(
+    #                 By.XPATH, XPATH_CLOUDFLARE_CHECKBOX
+    #             ).click()
+    #
+    #             self.driver.switch_to.default_content()
+    #             WebDriverWait(self.driver, TIMEOUT).until(
+    #                 EC.visibility_of_element_located(
+    #                     (By.XPATH, XPATH_LOGGEDIN_USERNAME)
+    #                 )
+    #             )
+    #
 
     def _check_login_valid(self) -> None:
         loggedin_username = self.driver.find_element(
@@ -223,7 +222,7 @@ class CardmarketClient:
 
     def update_card_prices(self) -> None:
         self.driver.get(MKM_SINGLES)
-        self._bypass_cloudflare()
+        # self._bypass_cloudflare()
         logger.info(f"GET request to: {MKM_SINGLES}")
         _medium_delay()
 
@@ -253,8 +252,7 @@ class CardmarketClient:
             )
             self.actions.move_to_element(next_page_element).perform()
             next_page_element.click()
-            self._bypass_cloudflare()
-
+            # self._bypass_cloudflare()
 
     def get_pricing_parameters_for_card(
         self, card_row: CardRow
@@ -267,7 +265,7 @@ class CardmarketClient:
             f"window.open('{card_row.card_url}');"
         )
         self.driver.switch_to.window(self.driver.window_handles[1])
-        self._bypass_cloudflare()
+        # self._bypass_cloudflare()
         _medium_delay()
 
         # Obtain Pricing Parameters
@@ -319,6 +317,7 @@ class CardmarketClient:
         #
         #         logger.info(f"Caught exception: {e}.")
         #         break
+
 
 @contextmanager
 def start_cardmarket_client(
