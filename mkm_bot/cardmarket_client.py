@@ -19,7 +19,6 @@ from .common import PricingParameters
 from .config import CardmarketConfig
 from .pricing import compute_price
 
-TIMEOUT = 30
 CLOUDFLARE_TAB_TITLE = 'Just a moment...'
 
 MKM_HOME = "https://cardmarket.com/en/Magic"
