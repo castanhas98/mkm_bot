@@ -13,15 +13,13 @@ from contextlib import contextmanager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
 from undetected_chromedriver.webelement import WebElement
 
 from .common import PricingParameters
 from .config import CardmarketConfig
 from .pricing import compute_price
 
-TIMEOUT = 20
+TIMEOUT = 30
 CLOUDFLARE_TAB_TITLE = 'Just a moment...'
 
 MKM_HOME = "https://cardmarket.com/en/Magic"
@@ -39,8 +37,8 @@ XPATH_LOGGEDIN_USERNAME = "/html/body/header/nav/ul/li/ul/li/a/div" \
 XPATH_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-flex " \
     "align-items-center pagination mb-2 mt-2']/div[@class='col-12 col" \
     "-sm-6 ms-auto']/div/span"
-XPATH_NEXT_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-" \
-    "flex align-items-center pagination mb-2 mt-2']/div[@class='col-12 " \
+XPATH_NEXT_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap " \
+    "d-flex align-items-center pagination mt-3']/div[@class='col-12 " \
     "col-sm-6 ms-auto']/div/a[@aria-label='Next page']"
 XPATH_CARD_ROWS = "/html/body/main/div[@id='UserOffersTable']/" \
     "div[@class='table-body']/div[@class='row g-0 article-row']"
@@ -67,7 +65,7 @@ def _short_delay() -> None:
 
 
 def _medium_delay() -> None:
-    time.sleep(float(random.randrange(450, 500)) / 100)
+    time.sleep(float(random.randrange(1000, 1500)) / 100)
     return
 
 
@@ -133,7 +131,7 @@ class CardmarketClient:
 
         # to be able to open new tabs
         chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--auto-open-devtools-for-tabs")
 
         self.driver = uc.Chrome(
             options=chrome_options, headless=False, use_subprocess=True)
@@ -147,7 +145,6 @@ class CardmarketClient:
 
     def login(self) -> None:
         self.driver.get(MKM_HOME)
-        # self._bypass_cloudflare()
         logger.info(f"GET request to: {MKM_HOME}")
         _medium_delay()
 
@@ -166,44 +163,10 @@ class CardmarketClient:
         self.driver.find_element(
             By.XPATH, XPATH_LOGIN
         ).click()
-        # self._bypass_cloudflare()
         logger.info("Logged in")
         _medium_delay()
 
         self._check_login_valid()
-
-    # def _bypass_cloudflare(self) -> None:
-    #     while True:
-    #         try:
-    #             # just checking some info to assess if we are at cloudflare
-    #             assert self.driver.title != CLOUDFLARE_TAB_TITLE
-    #             break
-    #
-    #         except AssertionError:
-    #             logger.info("Caught expected AssertionError")
-    #             WebDriverWait(self.driver, TIMEOUT).until(
-    #                 EC.frame_to_be_available_and_switch_to_it(
-    #                     (By.XPATH, XPATH_CLOUDFLARE_IFRAME)
-    #                 )
-    #             )
-    #
-    #             WebDriverWait(self.driver, TIMEOUT).until(
-    #                 EC.element_to_be_clickable(
-    #                     (By.XPATH, XPATH_CLOUDFLARE_CHECKBOX)
-    #                 )
-    #             )
-    #             _medium_delay()
-    #             self.driver.find_element(
-    #                 By.XPATH, XPATH_CLOUDFLARE_CHECKBOX
-    #             ).click()
-    #
-    #             self.driver.switch_to.default_content()
-    #             WebDriverWait(self.driver, TIMEOUT).until(
-    #                 EC.visibility_of_element_located(
-    #                     (By.XPATH, XPATH_LOGGEDIN_USERNAME)
-    #                 )
-    #             )
-    #
 
     def _check_login_valid(self) -> None:
         loggedin_username = self.driver.find_element(
@@ -222,7 +185,6 @@ class CardmarketClient:
 
     def update_card_prices(self) -> None:
         self.driver.get(MKM_SINGLES)
-        # self._bypass_cloudflare()
         logger.info(f"GET request to: {MKM_SINGLES}")
         _medium_delay()
 
@@ -250,22 +212,21 @@ class CardmarketClient:
             next_page_element = self.driver.find_element(
                 By.XPATH, XPATH_NEXT_PAGE
             )
-            self.actions.move_to_element(next_page_element).perform()
+            self.actions.scroll_to_element(next_page_element).perform()
             next_page_element.click()
-            # self._bypass_cloudflare()
+            _medium_delay()
 
     def get_pricing_parameters_for_card(
         self, card_row: CardRow
     ) -> PricingParameters:
-        assert len(self.driver.window_handles) == 1, \
+        assert len(self.driver.window_handles) == 2, \
             "Unexpected window handle count before opening new window"
 
         logger.info(f"Opening tab for card with link: {card_row.card_url}")
         self.driver.execute_script(
-            f"window.open('{card_row.card_url}');"
+            f"window.open('{card_row.card_url}', '_blank');"
         )
-        self.driver.switch_to.window(self.driver.window_handles[1])
-        # self._bypass_cloudflare()
+        self.driver.switch_to.window(self.driver.window_handles[-1])
         _medium_delay()
 
         # Obtain Pricing Parameters
@@ -287,7 +248,7 @@ class CardmarketClient:
         logger.info("Closing tab.")
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
-        assert len(self.driver.window_handles) == 1, \
+        assert len(self.driver.window_handles) == 2, \
             "Unexpected window handle count after closing the new window"
         _medium_delay()
 
@@ -305,18 +266,6 @@ class CardmarketClient:
 
         self.driver.find_element(By.XPATH, XPATH_SUBMIT_PRICE_BUTTON).click()
         _medium_delay()
-
-        # while True:
-        #     self.driver.find_element(By.XPATH, XPATH_SUBMIT_PRICE_BUTTON).click()
-        #     logger.info("Clicked on edit article to submit price.")
-        #     _medium_delay()
-        #
-        #     try:
-        #         self.driver.find_element(By.XPATH, XPATH_SUBMIT_PRICE_BUTTON).click()
-        #     except Exception as e:  # SHOULD BE EXPLICIT
-        #
-        #         logger.info(f"Caught exception: {e}.")
-        #         break
 
 
 @contextmanager
