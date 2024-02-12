@@ -1,6 +1,8 @@
 import pytest
 
-from mkm_bot.cardmarket_client import is_last_page
+from decimal import Decimal
+
+from mkm_bot.cardmarket_client import is_last_page, get_price_from_string
 
 PAGE_X_OF_Y_SUCCESS_PARAM = [
     ("Page 1 of 1", True),
@@ -49,3 +51,50 @@ def test_is_last_page_invalid_page_nubmers(
         is_last_page(page_x_of_y)
 
     assert str(e.value) == f"Invalid page numbers: current={x}, total={y}"
+
+
+PRICE_STR_SUCCESS_PAR = [
+    ("0,07 €", Decimal(0.07)),
+    ("10,07 €", Decimal(10.07)),
+    ("0,01 €", Decimal(0.01)),
+    ("999999999,99 €", Decimal(999999999.99)),
+    ("1,50 €", Decimal(1.50)),
+]
+
+
+@pytest.mark.parametrize("price_str,expected", PRICE_STR_SUCCESS_PAR)
+def test_get_price_from_string_success(
+    price_str: str,
+    expected: Decimal
+) -> None:
+    price = get_price_from_string(price_str)
+    assert round(price, 2) == round(expected, 2)
+
+
+PRICE_STR_NO_MATCH_PAR = [
+    ("0,07€"),
+    ("10.07 €"),
+    ("0,1 €"),
+    ("1,50 €."),
+    (" 1,50 €.")
+]
+
+
+@pytest.mark.parametrize("price_str", PRICE_STR_NO_MATCH_PAR)
+def test_get_price_from_string_no_match(
+    price_str: str
+) -> None:
+    with pytest.raises(RuntimeError) as e:
+        get_price_from_string(price_str)
+
+    assert str(e.value) == f"No match for '{price_str}'"
+
+
+def test_get_price_from_string_read_zero() -> None:
+    price_str = "0,00 €"
+    price = Decimal("0,00".replace(',', '.'))
+
+    with pytest.raises(RuntimeError) as e:
+        get_price_from_string(price_str)
+
+    assert str(e.value) == f"Price ({price}) is Zero!: {price_str}"
