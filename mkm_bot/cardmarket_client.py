@@ -19,8 +19,6 @@ from .common import PricingParameters
 from .config import CardmarketConfig
 from .pricing import compute_price
 
-CLOUDFLARE_TAB_TITLE = 'Just a moment...'
-
 MKM_HOME = "https://cardmarket.com/en/Magic"
 MKM_SINGLES = "https://cardmarket.com/en/Magic/Stock/Offers/Singles"
 
@@ -64,7 +62,7 @@ def _short_delay() -> None:
 
 
 def _medium_delay() -> None:
-    time.sleep(float(random.randrange(1000, 1500)) / 100)
+    time.sleep(float(random.randrange(750, 1000)) / 100)
     return
 
 
