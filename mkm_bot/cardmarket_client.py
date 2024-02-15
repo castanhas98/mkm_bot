@@ -59,11 +59,6 @@ XPATH_PRICE_1 = "//dt[contains(.,'1-day average price')]/following::dd"
 logger = logging.getLogger(__name__)
 
 
-def _short_delay() -> None:
-    time.sleep(float(random.randrange(1, 500)) / 1000)
-    return
-
-
 def _medium_delay() -> None:
     time.sleep(float(random.randrange(850, 1100)) / 100)
     return
@@ -79,7 +74,8 @@ def is_last_page(page_x_of_y: str) -> bool:
 
     if current > total or current == 0 or total == 0:
         raise RuntimeError(
-            f"Invalid page numbers: current={current}, total={total}")
+            f"Invalid page numbers: current={current}, total={total}"
+        )
 
     return current == total
 
@@ -105,10 +101,6 @@ class CardRow:
 
     @classmethod
     def from_web_element(cls, card_row_element: WebElement) -> CardRow:
-        card_url = card_row_element.find_element(
-            By.XPATH, XPATH_CARD_URL
-        ).get_attribute("href")
-
         foil_elements = len(card_row_element.find_elements(
             By.XPATH, XPATH_FOIL_SYMBOL
         ))
@@ -116,6 +108,10 @@ class CardRow:
             "Unexpected nunumber of foil elements."
 
         is_foil = bool(foil_elements == 1)
+
+        card_url = card_row_element.find_element(
+            By.XPATH, XPATH_CARD_URL
+        ).get_attribute("href")
 
         if is_foil:
             card_url += FOIL_SUFFIX
@@ -142,7 +138,6 @@ class CardmarketClient:
 
         # to be able to open new tabs
         chrome_options.add_argument("--disable-popup-blocking")
-        # chrome_options.add_argument("--auto-open-devtools-for-tabs")
 
         self.driver = uc.Chrome(
             options=chrome_options, headless=False, use_subprocess=True)
@@ -199,27 +194,17 @@ class CardmarketClient:
         logger.info(f"GET request to: {MKM_SINGLES}")
         _medium_delay()
 
-        logger.info(f"are_foil={are_foil}.")
-        is_foil_element = self.driver.find_element(
-           By.XPATH, XPATH_FOIL_DROPDOWN
-        )
-        Select(is_foil_element).select_by_value(
-            "Y" if are_foil else "N"
-        )
-        _medium_delay()
-
-        self.driver.find_element(By.XPATH, XPATH_SEARCH).click()
-        _medium_delay()
+        self._filter_foil_non_foil_cards(are_foil)
 
         while True:
             for card_element in self.driver.find_elements(
                 By.XPATH, XPATH_CARD_ROWS
             ):
+                logger.info(f"Iterating through card_elements: {card_element}")
                 self.actions.scroll_to_element(card_element).perform()
 
-                logger.info(f"card_element: {card_element}")
                 card_row = CardRow.from_web_element(card_element)
-                logger.info(f"card_row: {card_row}")
+                logger.info(f"CardRow for current element: {card_row}")
 
                 parameters = self.get_pricing_parameters_for_card(card_row)
 
@@ -239,6 +224,22 @@ class CardmarketClient:
             next_page_element.click()
             _medium_delay()
 
+    def _filter_foil_non_foil_cards(self, are_foil: bool) -> None:
+        logger.info(
+            f"We are updating for {'' if are_foil else 'non-'}foil cards."
+        )
+
+        is_foil_element = self.driver.find_element(
+            By.XPATH, XPATH_FOIL_DROPDOWN
+        )
+
+        select_foil = Select(is_foil_element)
+        select_foil.select_by_value("Y" if are_foil else "N")
+        _medium_delay()
+
+        self.driver.find_element(By.XPATH, XPATH_SEARCH).click()
+        _medium_delay()
+
     def get_pricing_parameters_for_card(
         self, card_row: CardRow
     ) -> PricingParameters:
@@ -253,7 +254,6 @@ class CardmarketClient:
         self.driver.switch_to.window(self.driver.window_handles[-1])
         _medium_delay()
 
-        # Obtain Pricing Parameters
         from_price = self.driver.find_element(By.XPATH, XPATH_PRICE_FROM).text
         tren_price = self.driver.find_element(By.XPATH, XPATH_PRICE_TREND).text
         thirty_price = self.driver.find_element(By.XPATH, XPATH_PRICE_30).text
@@ -286,11 +286,13 @@ class CardmarketClient:
         _medium_delay()
 
         rounded_price = str(round(price, 2))
-        self.driver.find_element(By.XPATH, XPATH_PRICE_INPUT).clear()
-        logger.info("Cleared existing price.")
-        self.driver.find_element(By.XPATH, XPATH_PRICE_INPUT).send_keys(
-            rounded_price
+        price_input_element = self.driver.find_element(
+            By.XPATH, XPATH_PRICE_INPUT
         )
+
+        price_input_element.clear()
+        logger.info("Cleared existing price.")
+        price_input_element.send_keys(rounded_price)
         logger.info(f"Filled in new price: {rounded_price}")
 
         self.driver.find_element(By.XPATH, XPATH_SUBMIT_PRICE_BUTTON).click()

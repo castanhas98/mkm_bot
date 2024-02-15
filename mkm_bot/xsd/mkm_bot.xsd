@@ -9,6 +9,7 @@
         <xs:sequence>
             <xs:element name="Logging" type="mkm:LoggingType"/>
             <xs:element name="Cardmarket" type="mkm:CardmarketType"/>
+            <xs:element name="Smtp" type="mkm:SmtpType"/>
         </xs:sequence>
     </xs:complexType>
 </xs:element>
@@ -23,6 +24,13 @@
         <xs:sequence>
             <xs:element name="Endpoint" type="xs:string"/>
             <xs:element name="UsernamePath" type="xs:string"/>
+            <xs:element name="PasswordPath" type="xs:string"/>
+        </xs:sequence>
+</xs:complexType>
+  
+<xs:complexType name="SmtpType">
+        <xs:sequence>
+            <xs:element name="EmailPath" type="xs:string"/>
             <xs:element name="PasswordPath" type="xs:string"/>
         </xs:sequence>
 </xs:complexType>
