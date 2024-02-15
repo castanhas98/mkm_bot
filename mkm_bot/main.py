@@ -4,10 +4,12 @@ import sys
 
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
-from .xsd.xml_config import read_and_validate_xml_config
-from .config import MkmBotConfig, LoggingConfig
 from .cardmarket_client import start_cardmarket_client
+from .config import MkmBotConfig, LoggingConfig
+from .smtp import send_email_report
+from .xsd.xml_config import read_and_validate_xml_config
 
 
 def setup_logging(config: LoggingConfig) -> None:
@@ -37,13 +39,20 @@ def main() -> None:
 
     logger.info("Successfully read XML config: %s", mkm_bot_config)
 
-    with start_cardmarket_client(
-        mkm_bot_config.cardmarket_config
-    ) as cardmarket_client:
-        cardmarket_client.login()
+    exception: Optional[Exception] = None
+    try:
+        with start_cardmarket_client(
+            mkm_bot_config.cardmarket_config
+        ) as cardmarket_client:
+            cardmarket_client.login()
 
-        cardmarket_client.update_card_prices(are_foil=False)
-        cardmarket_client.update_card_prices(are_foil=True)
+            cardmarket_client.update_card_prices(are_foil=False)
+            cardmarket_client.update_card_prices(are_foil=True)
+
+    except Exception as e:
+        exception = e
+
+    send_email_report(mkm_bot_config.smtp_config, exception)
 
     logger.info("Done. Shutting down.")
     return

@@ -311,5 +311,6 @@ def start_cardmarket_client(
         yield cardmarket_client
     except Exception as e:
         logger.error(e)
+        raise e
     finally:
         cardmarket_client._close_driver()
