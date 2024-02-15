@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
 from undetected_chromedriver.webelement import WebElement
 
 from .common import PricingParameters
@@ -21,16 +22,16 @@ from .pricing import compute_price
 
 MKM_HOME = "https://cardmarket.com/en/Magic"
 MKM_SINGLES = "https://cardmarket.com/en/Magic/Stock/Offers/Singles"
+FOIL_SUFFIX = "?isFoil=Y"
 
 NAME_USERNAME = "username"
 NAME_PASSWORD = "userPassword"
 
-XPATH_CLOUDFLARE_IFRAME = "//iframe[@title='Widget containing a " \
-    "Cloudflare security challenge']"
-XPATH_CLOUDFLARE_CHECKBOX = "//label[@class='ctp-checkbox-label']"
 XPATH_LOGIN = "/html/body/header/nav/ul/li/div/form/input[@value='Log in']"
 XPATH_LOGGEDIN_USERNAME = "/html/body/header/nav/ul/li/ul/li/a/div" \
     "[@title='My Account']/span[@class='d-none d-lg-block']"
+XPATH_SEARCH = "//input[@title='Search']"
+XPATH_FOIL_DROPDOWN = "//select[@name='isFoil']"
 XPATH_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap d-flex " \
     "align-items-center pagination mb-2 mt-2']/div[@class='col-12 col" \
     "-sm-6 ms-auto']/div/span"
@@ -40,6 +41,8 @@ XPATH_NEXT_PAGE = "/html/body/main/div[@class='row g-0 flex-nowrap " \
 XPATH_CARD_ROWS = "/html/body/main/div[@id='UserOffersTable']/" \
     "div[@class='table-body']/div[@class='row g-0 article-row']"
 XPATH_CARD_URL = ".//div[@class='col-sellerProductInfo col']/div/div/a"
+XPATH_FOIL_SYMBOL = ".//div[@class='col-product col-12 col-lg']/div/div" \
+    "/span[@aria-label='Foil']"
 XPATH_EDIT_BUTTON = ".//div[@class='col-offer col-auto']/div[@class=" \
     "'actions-container d-flex align-items-center justify-content-end " \
     "col ps-2 pe-0']/div[@class='d-inline-flex']/div/a"
@@ -62,7 +65,7 @@ def _short_delay() -> None:
 
 
 def _medium_delay() -> None:
-    time.sleep(float(random.randrange(750, 1000)) / 100)
+    time.sleep(float(random.randrange(850, 1100)) / 100)
     return
 
 
@@ -106,6 +109,17 @@ class CardRow:
             By.XPATH, XPATH_CARD_URL
         ).get_attribute("href")
 
+        foil_elements = len(card_row_element.find_elements(
+            By.XPATH, XPATH_FOIL_SYMBOL
+        ))
+        assert foil_elements == 0 or foil_elements == 1, \
+            "Unexpected nunumber of foil elements."
+
+        is_foil = bool(foil_elements == 1)
+
+        if is_foil:
+            card_url += FOIL_SUFFIX
+
         edit_element = card_row_element.find_element(
             By.XPATH, XPATH_EDIT_BUTTON
         )
@@ -128,7 +142,7 @@ class CardmarketClient:
 
         # to be able to open new tabs
         chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--auto-open-devtools-for-tabs")
+        # chrome_options.add_argument("--auto-open-devtools-for-tabs")
 
         self.driver = uc.Chrome(
             options=chrome_options, headless=False, use_subprocess=True)
@@ -180,16 +194,28 @@ class CardmarketClient:
         logger.info(
             "Successfully checked that username is as expected after login")
 
-    def update_card_prices(self) -> None:
+    def update_card_prices(self, are_foil: bool) -> None:
         self.driver.get(MKM_SINGLES)
         logger.info(f"GET request to: {MKM_SINGLES}")
+        _medium_delay()
+
+        logger.info(f"are_foil={are_foil}.")
+        is_foil_element = self.driver.find_element(
+           By.XPATH, XPATH_FOIL_DROPDOWN
+        )
+        Select(is_foil_element).select_by_value(
+            "Y" if are_foil else "N"
+        )
+        _medium_delay()
+
+        self.driver.find_element(By.XPATH, XPATH_SEARCH).click()
         _medium_delay()
 
         while True:
             for card_element in self.driver.find_elements(
                 By.XPATH, XPATH_CARD_ROWS
             ):
-                self.actions.move_to_element(card_element).perform()
+                self.actions.scroll_to_element(card_element).perform()
 
                 logger.info(f"card_element: {card_element}")
                 card_row = CardRow.from_web_element(card_element)
@@ -216,8 +242,9 @@ class CardmarketClient:
     def get_pricing_parameters_for_card(
         self, card_row: CardRow
     ) -> PricingParameters:
-        assert len(self.driver.window_handles) == 2, \
-            "Unexpected window handle count before opening new window"
+        assert len(self.driver.window_handles) == 1, \
+            "Unexpected window handle count before opening new window:" \
+            f"{len(self.driver.window_handles)}"
 
         logger.info(f"Opening tab for card with link: {card_row.card_url}")
         self.driver.execute_script(
@@ -245,23 +272,29 @@ class CardmarketClient:
         logger.info("Closing tab.")
         self.driver.close()
         self.driver.switch_to.window(self.driver.window_handles[0])
-        assert len(self.driver.window_handles) == 2, \
-            "Unexpected window handle count after closing the new window"
+        assert len(self.driver.window_handles) == 1, \
+            "Unexpected window handle count after closing the new window: " \
+            f"{len(self.driver.window_handles)}"
         _medium_delay()
 
         return pricing_parameters
 
     def update_single_price(self, price: Decimal, card_row: CardRow) -> None:
+        self.actions.scroll_to_element(card_row.edit_element).perform()
         card_row.edit_element.click()
+        logger.info("Editing card listing.")
         _medium_delay()
 
         rounded_price = str(round(price, 2))
         self.driver.find_element(By.XPATH, XPATH_PRICE_INPUT).clear()
+        logger.info("Cleared existing price.")
         self.driver.find_element(By.XPATH, XPATH_PRICE_INPUT).send_keys(
             rounded_price
         )
+        logger.info(f"Filled in new price: {rounded_price}")
 
         self.driver.find_element(By.XPATH, XPATH_SUBMIT_PRICE_BUTTON).click()
+        logger.info("Submitted new price.")
         _medium_delay()
 
 
