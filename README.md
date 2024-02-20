@@ -8,8 +8,4 @@ LIMITATION: to 300 foil and 300 non-foil cards.
 ## Using the bot
 
 ## To Do
-- logging
-- getting data from cardmarket
-- logging in to cardmarket and performing actions
-- database with cards
-- order processing
+- Enrich status email (start/end time, number of cards processed)
