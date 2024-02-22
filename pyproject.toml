@@ -3,7 +3,7 @@ name = "mkm_bot"
 description = "A cardmarket.com bot to help updating card stock prices."
 readme = "README.md"
 authors = [{name = "Francisco Castanheira", email = "franciscocastanheira1998@gmail.com"}]
-requires-python = ">=3.11"
+requires-python = ">=3.8"
 dynamic = ["version"]
 dependencies = [
     "lxml~=5.1",
