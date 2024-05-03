@@ -13,7 +13,7 @@ python3.11 -m pip install -e .
 
 ## Using the bot
 
-Be sure to create four files with the cardmarket username and password, as well as the email and password (you need to create some gmail API credentials, can follow the following tutorial https://mailtrap.io/blog/python-send-email-gmail/#:~:text=your%20Python%20script.-,How%20to%20send%20an%20email%20with%20Python%20via%20Gmail%20API%3F,-The%20Gmail%20API). These correspond to the `mkm_username`, `mkm_password`, `gmail_email`, and `gmail_password` files referenced in `mkm_bot/mkm_bot/xsd/mkm_bot.xml`.
+Be sure to create four files with the cardmarket username and password, as well as the email and password (you need to create some gmail API credentials, can follow a [tutorial](https://mailtrap.io/blog/python-send-email-gmail/#:~:text=your%20Python%20script.-,How%20to%20send%20an%20email%20with%20Python%20via%20Gmail%20API%3F,-The%20Gmail%20API)). These correspond to the `mkm_username`, `mkm_password`, `gmail_email`, and `gmail_password` files referenced in `mkm_bot/mkm_bot/xsd/mkm_bot.xml`.
 
 To run, use the following command, substituting `/path/to/mkm_bot.xml` with the correct path to the config.
 ```
