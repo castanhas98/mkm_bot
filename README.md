@@ -1,6 +1,10 @@
 # mkm_bot
 
-A cardmarket.com bot to help updating card stock prices. Currently, the bot checks the highest price for each card, between From, Trend, 1-, 7-, and 30-day averages and prices the card as 25% above that value (or 15%, for cards above 15 euros). 
+A cardmarket.com bot to help updating card stock prices.
+
+Currently, the bot checks the highest price for each card, between From, Trend, 1-, 7-, and 30-day averages and prices the card as 25% above that value (or 15%, for cards above 15 euros). 
+
+The bot takes quite a while to run, since it has to stay idle for some amount of seconds after each action, in order to avoid Cloudflare detection.
 
 LIMITATION: Currently, the bot has the limitation of only being able to handle up to 300 foil and up to 300 non-foil cards.
 
