@@ -1,7 +1,8 @@
 # mkm_bot
 
-A cardmarket.com bot to help updating card stock prices.
-LIMITATION: to 300 foil and 300 non-foil cards.
+A cardmarket.com bot to help updating card stock prices. Currently, the bot checks the highest price for each card, between From, Trend, 1-, 7-, and 30-day averages and prices the card as 25% above that value (or 15%, for cards above 15 euros). 
+
+LIMITATION: Currently, the bot has the limitation of only being able to handle up to 300 foil and up to 300 non-foil cards.
 
 ## Installation
 
@@ -22,6 +23,8 @@ mkm-bot /path/to/mkm_bot.xml
 
 Logs are placed by default in the `mkm_bot/.log` directory, but that can be changed in the config.
 
+## To Do
+- Create a finer pricing model. 
 
 ## Common Issues
 - 21/Feb/2024: New chromium version, 122, was set to latest/candidate but not latest/release. Let's see how long it takes to fix. Error when launching `driver = uc.Chrome(...)`.
