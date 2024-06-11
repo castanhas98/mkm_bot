@@ -5,8 +5,8 @@ from .common import PricingParameters
 
 logger = logging.getLogger(__name__)
 
-MIN_PRICE = Decimal(0.25)
-MULTIPLIER = Decimal(1.25)
+MIN_PRICE = Decimal(0.15)
+MULTIPLIER = Decimal(1.10)
 MULTIPLER_15_PLUS = Decimal(1.10)
 
 
