@@ -45,7 +45,12 @@ def _prepare_email(
     subject = SUCCESS if success else FAILURE
     msg['Subject'] = subject
 
-    text = repr(exception) if exception else "No exceptions."
+    text: str
+    if exception:
+        text = repr(exception) + "\n" + \
+            getattr(exception, "msg", "No message.")
+    else:
+        "No exceptions."
     msg.set_content(text)
 
     return msg
