@@ -140,7 +140,11 @@ class CardmarketClient:
         chrome_options.add_argument("--disable-popup-blocking")
 
         self.driver = uc.Chrome(
-            options=chrome_options, headless=False, use_subprocess=True)
+            options=chrome_options,
+            headless=False,
+            use_subprocess=True,
+            version_main=125
+        )
 
         self.actions = ActionChains(self.driver)
 
