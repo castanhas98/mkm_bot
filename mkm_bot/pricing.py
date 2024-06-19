@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 MIN_PRICE = Decimal(0.15)
 MULTIPLIER = Decimal(1.10)
-MULTIPLER_15_PLUS = Decimal(1.10)
+MULTIPLER_15_PLUS = Decimal(1.08)
 
 
 def compute_price(parameters: PricingParameters) -> Decimal:
@@ -34,7 +34,7 @@ def compute_price(parameters: PricingParameters) -> Decimal:
         price *= MULTIPLER_15_PLUS
 
     logger.info(
-       f"Computed price ({price}) for pricing parameters: {parameters}"
+        f"Computed price ({price}) for pricing parameters: {parameters}"
     )
 
     return price
