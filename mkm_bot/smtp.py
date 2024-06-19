@@ -50,7 +50,7 @@ def _prepare_email(
         text = repr(exception) + "\n" + \
             getattr(exception, "msg", "No message.")
     else:
-        "No exceptions."
+        text = "No exceptions."
     msg.set_content(text)
 
     return msg
