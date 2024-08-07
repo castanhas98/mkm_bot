@@ -65,5 +65,5 @@ self.driver = uc.Chrome(
   options=chrome_options,
   headless=False,
   use_subprocess=True,
-  version_main=122  # this is the line we care about
+  version_main=121  # this is the line we care about
 )

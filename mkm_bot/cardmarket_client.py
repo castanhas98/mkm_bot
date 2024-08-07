@@ -143,7 +143,7 @@ class CardmarketClient:
             options=chrome_options,
             headless=False,
             use_subprocess=True,
-            version_main=125
+            version_main=127
         )
 
         self.actions = ActionChains(self.driver)
